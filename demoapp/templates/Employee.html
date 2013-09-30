@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    {%load staticfiles%}
+    <title>Employees</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    
+   <script src="{% static "bootstrap/js/jquery-1.7.2.js"%}"></script>
+    
+    <link rel="stylesheet" type="text/css" href="{% static "bootstrap/css/bootstrap.css"%}"/>
+      
+    <script src="{% static "bootstrap/js/bootstrap.js"%}"></script>
+    <script src="bootstrap/js/validate.min.js%}"></script>
+    <script>
+        function onEmployeeClick(vEmpId) {
+            
+            $.ajax({
+                type: "GET",
+                url: "empdetail",
+                data: {
+                    'EMP_ID': vEmpId,
+                 },
+                success: function (data) {
+                    
+                    var resultSet = $.parseJSON(data);
+                    
+                    var empTable = " <div class=\"row\"><div class=\"span6\">Employee Id</div><div class=\"span6\"> <input type=\"text\" name=\"tbEmpId\" value=\"" + resultSet['EMPLOYEE_ID'] + "\" readonly=\"true\"/></div></div>" +
+                                   " <div class=\"row\"><div class=\"span6\">Employee Name</div><div class=\"span6\"> <input type=\"text\" name=\"tbEmpName\"  value=\"" + resultSet['EMPLOYEE_NAME'] + "\" readonly=\"true\"/></div></div>" +
+                                   " <div class=\"row\"><div class=\"span6\">Employee DOB</div><div class=\"span6\"> <input type=\"text\" name=\"tbEmpDOB\"  value=\"" + resultSet['EMPLOYEE_DOB'] + "\" readonly=\"true\"/></div></div>" +
+                                   " <div class=\"row\"><div class=\"span6\">Employee Salary</div><div class=\"span6\"> <input type=\"text\" name=\"tbEmpSalary\"  value=\"" + resultSet['EMPLOYEE_SALARY'] + "\" readonly=\"true\"/></div></div>"
+                    
+                    $("#divDetail").html(empTable);
+                                        
+                },
+                
+                error: function () {
+                    alert("Error");
+                }
+            });
+
+           
+        }
+
+        function onEmployeeSearch() {
+            
+            vEmployeeId = $("input[name=tbEmpIdSearch]").val();
+            vEmployeeName = $("input[name=tEmpNameSearch]").val();
+            
+            $.ajax({
+                type: "GET",
+                url: "empsearch",
+                data: {
+                    
+                    'EMP_ID': vEmployeeId,
+                    'EMP_NAME': vEmployeeName,
+                },
+                success: function (data) {
+
+                    var resultSet = $.parseJSON(data);
+                    var empTable = "";
+                    if (vEmployeeId != "") {
+
+                        empTable = " <div class=\"row\"><div class=\"span6\">Employee Id</div><div class=\"span6\"> <input type=\"text\" name=\"tbEmpId\" value=\"" + resultSet['EMPLOYEE_ID'] + "\" readonly=\"true\"/></div></div>" +
+                                       " <div class=\"row\"><div class=\"span6\">Employee Name</div><div class=\"span6\"> <input type=\"text\" name=\"tbEmpName\"  value=\"" + resultSet['EMPLOYEE_NAME'] + "\" readonly=\"true\"/></div></div>" +
+                                       " <div class=\"row\"><div class=\"span6\">Employee DOB</div><div class=\"span6\"> <input type=\"text\" name=\"tbEmpDOB\"  value=\"" + resultSet['EMPLOYEE_DOB'] + "\" readonly=\"true\"/></div></div>" +
+                                       " <div class=\"row\"><div class=\"span6\">Employee Salary</div><div class=\"span6\"> <input type=\"text\" name=\"tbEmpSalary\"  value=\"" + resultSet['EMPLOYEE_SALARY'] + "\" readonly=\"true\"/></div></div>"
+                       
+                    }
+                    // We have list of employees
+                    else {
+                        empTable = "<div class=\"row\"><div class=\"span4\"><b>Id</b> </div>" +
+                            " <div class=\"span3\"><b>DOB</b></div>" +
+                            " <div class=\"span3\"><b>Salary</b></div></div>";
+                        
+                        for (i = 0; i < resultSet.length; i++) {
+                            empTable = empTable + "<div class=\"row\"><div class=\"span4\"><a type=\"text\" name=\"tbEmpId\" href=\"#\" onclick=\"onEmployeeClick(" + resultSet[i]['EMPLOYEE_ID'] + ")\">" + resultSet[i]['EMPLOYEE_ID'] + "</a></div>" +
+                                       " <div class=\"span3\"><input type=\"text\" name=\"tbEmpDOB\"  value=\"" + resultSet[i]['EMPLOYEE_DOB'] + "\" readonly=\"true\"/></div>" +
+                                       " <div class=\"span3\"><input type=\"text\" name=\"tbEmpSalary\"  value=\"" + resultSet[i]['EMPLOYEE_SALARY'] + "\" readonly=\"true\"/></div></div>";
+                        }
+
+                       // empTable = empTableConstant + empTable;
+                    }
+                    $("#divDetail").html(empTable);
+                    
+
+                },
+
+                error: function () {
+                    alert("Error");
+                }
+            });
+
+        }
+    </script>
+    
+</head>
+<body>
+      <div class="container">
+        <div class="navbar">
+                <div class="navbar-inner">
+                    <a class="brand" href="#" >
+                     @ ABC
+                    </a>
+                    <ul class="nav">
+                        <li class="active"><a href="#">Employees</a></li>
+                    </ul>
+                </div>
+            </div>
+          <div>
+              <div class="row">
+                    
+                    <div class="span5">Employee Id <input type="text" name="tbEmpIdSearch"/></div>
+                    <div class="span5"> Name <input type="text" name="tEmpNameSearch"/></div>
+                     <div class="span2"><button class="btn" type="button" onclick="onEmployeeSearch()">Search</button></div>
+                </div>
+              <div class="row">
+                  <div class="span2">Employees</div>
+                  <div class="span10"><hr /></div>
+              </div>
+              <div class="row">
+
+                  <div class="span1">
+                      <ul>
+                          {% if employees_list %}
+			                    {% for item in employees_list %}
+                     
+                                    <li><a onclick="onEmployeeClick({{item.employeeid}})" href="#">{{item.employeeid}}-{{item.name}}</a></li>
+                    
+                                {% endfor %}
+			               {% endif %}    
+                      </ul>
+                  </div>
+
+                  <div class="span1"></div>
+                  <div id="divDetail" class="span10"> Selected or Searched Employee Here</div>
+              </div>
+
+          </div>
+        
+            
+    </div>
+</body>
+</html>
